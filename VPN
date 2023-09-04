@@ -1,0 +1,127 @@
+#!/bin/bash
+
+# Credits To : InFedus 
+
+
+# Scripts description
+echo "Why enter each time the VPN manually,
+Use this scrip :D"
+sleep 1
+#"<====================================================================>"
+# var of ipv6 to becheckd later
+# HTBs VPN errors the connection if the value.
+var1=$(cat /proc/sys/net/ipv6/conf/all/disable_ipv6)
+echo "/proc/sys/net/ipv6/conf/all/disable_ipv6 Is set to..."
+
+cat /proc/sys/net/ipv6/conf/all/disable_ipv6
+
+#<====================================================================>
+# This will create a config file, when the user will input the
+# data it will be saved to the file and called upon the 
+# activation of the script.
+
+function config() {
+
+echo "Creating a Conf file for futer uses..."
+
+echo "Set the path for the Hack The Box VPN file..."
+read path_to_htb 
+
+echo "path_to_htb=$path_to_htb" > ~/.vpn_conf.sh
+
+echo "Set the path for the Try Hack Me VPN file..."
+read path_to_thm 
+
+echo "path_to_thm=$path_to_thm" >> ~/.vpn_conf.sh
+
+echo "Password for sudo..."
+read password_sudo 
+
+echo "password_sudo=$password_sudo" >> ~/.vpn_conf.sh
+
+}
+
+#<====================================================================>
+# function for the VPN connection to HTB
+# in case of ipv6 sys net is set to "1" the script will change the value
+# to "0", and if set to "0" to begin with, the function
+# will cat the value for the user, the function will also open a 
+# connection as sudo.
+
+function launch() {
+
+if [ -e ~/.vpn_conf.sh ]; then
+
+source ~/.vpn_conf.sh
+
+function HTB() {
+
+	if [ $var1 -eq "1" ]
+		then
+
+echo '$password_sudo' | sudo -S sysctl net.ipv6.conf.all.disable_ipv6=0
+		
+	echo "<=============================================>"
+	echo "ipv6 chacnged to 0"
+	echo "<=============================================>"
+		else
+	echo " ipv6 is 0 already, Exiting..."
+
+if [ $var1 -eq "0" ]
+	then
+	echo "<=============================================>"
+	echo "Starting Hack The Boxs VPN..."
+	echo "<=============================================>"
+		echo '$password_sudo' | sudo -S openvpn $path_to_htb
+	fi
+
+fi
+
+}
+
+# function for TryHackMe VPN connections also chacnges the necessary cipher,
+# notifies the user about the change.
+
+function THM() {
+
+sed -i 's/cipher AES-256-CBC/data-ciphers AES-256-CBC/' *.ovpn $path_to_thm
+	echo "ciper is chacnged..."
+	echo "<=============================================>"
+	echo "Starting TryHackMes VPN..."
+		echo '$password_sudo' | sudo -S openvpn $path_to_thm
+}
+
+# mini menu for the user to choose the VPN to connect too
+# with "if" statements
+echo "<=============================================>"
+echo "Choose a VPN to start
+
+1) Hack The Box
+2) Try Hack Me"
+echo "<=============================================>"
+read var2
+	if [ $var2 -eq "1" ]
+		then
+	echo "<=============================================>"
+	echo "You have selected Hack The Box VPN."
+	echo "<=============================================>"
+	HTB
+fi
+	if
+		[ $var2 -eq "2" ]
+			then
+		echo "<=============================================>"
+		echo "You have selected Try Hack Me VPN."
+		echo "<=============================================>"
+		THM
+	fi
+		
+		else
+	config
+	
+
+	fi
+	
+}
+		
+	launch
